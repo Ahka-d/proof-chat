@@ -39,7 +39,7 @@ La estructura sigue el estándar modular de NestJS, facilitando el mantenimiento
 
 ## 2. Diseño de Entidades y Relaciones
 Se implementó un modelo relacional normalizado en PostgreSQL:
-* **Users**: Creacion de usuario para: Inicio de seccion, Registro y CRUD general.
+* **Users**: Creacion de usuario para: Inicio de sesion, Registro y CRUD general.
 * **Conversaciones y Participantes**: Relación *Many-to-Many* explícita para control total sobre los miembros del chat.
 * **Mensajería**: Integración de integridad referencial con `ON DELETE CASCADE` en cascada para limpieza de datos.
 * **MensajeEnviados**: Integracion de relacion para localizar en tiempo los chats leidos y por cuantos usuarios.
