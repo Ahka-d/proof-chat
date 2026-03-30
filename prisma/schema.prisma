@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid()) @db.Uuid
+  email         String         @unique @db.VarChar(255)
+  password      String         @db.VarChar(255)
+  username      String         @unique @db.VarChar(50)
+  role          String         @default("USER") @db.VarChar(20) // USER, ADMIN.
+  isOnline      Boolean        @default(false) @map("is_online")
+  isBanned      Boolean        @default(false) @map("is_banned")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Relaciones
+  messages      Message[]      @relation("UserMessages")
+  participations Participant[]
+  activityLogs  ActivityLogs[]
+  messageReads  MessageRead[]
+
+  @@map("users")
+}
+
+model Conversation {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       String?       @db.VarChar(100)
+  isGroup     Boolean       @default(false) @map("is_group")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relaciones
+  messages     Message[]
+  participants Participant[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String        @id @default(uuid()) @db.Uuid
+  content        String        @db.Text
+  createdAt      DateTime      @default(now()) @map("created_at")
+  
+  conversationId String        @db.Uuid @map("conversation_id")
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       String        @db.Uuid @map("sender_id")
+  sender         User          @relation("UserMessages", fields: [senderId], references: [id])
+
+  reads          MessageRead[]
+
+  @@map("messages")
+}
+
+model MessageRead {
+  messageId String   @db.Uuid @map("message_id")
+  userId    String   @db.Uuid @map("user_id")
+  readAt    DateTime @default(now()) @map("read_at")
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId]) // Clave compuesta: un usuario lee un mensaje una vez
+  @@map("messages_read")
+}
+
+model Participant {
+  conversationId String       @db.Uuid @map("conversation_id")
+  userId         String       @db.Uuid @map("user_id")
+
+  // Relaciones
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Clave primaria compuesta
+  @@id([conversationId, userId])
+  @@map("participants")
+}
+
+model ActivityLogs {
+  id        String   @id @default(uuid()) @db.Uuid
+  action    String
+  timestamp DateTime @default(now())
+
+  // Relación: Muchas actividades pertenecen a UN usuario
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.Uuid @map("user_id")
+}

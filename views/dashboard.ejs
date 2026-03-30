@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <h1 class="text-3xl font-bold mb-6">Panel de Administración</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Usuarios Online</p>
+            <p class="text-4xl font-bold text-green-600"><%= stats.activeUsers %></p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Total Mensajes</p>
+            <p class="text-4xl font-bold text-blue-600"><%= stats.totalMessages %></p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Chats abiertos</p>
+            <p class="text-4xl font-bold text-green-600"><%= stats.totalConversations %></p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Mensajes leidos</p>
+            <p class="text-4xl font-bold text-green-600"><%= stats.unreadStats.readCount %></p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm">
+            <p class="text-sm text-gray-500 uppercase font-semibold">Mensajes no leidos</p>
+            <p class="text-4xl font-bold text-green-600"><%= stats.unreadStats.unreadCount %></p>
+        </div>
+
+        <% stats.usersByRole.forEach(role => { %>
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+                <p class="text-sm text-gray-500 uppercase font-semibold"><%= role.role %></p>
+                <p class="text-4xl font-bold text-green-600"><%= role._count.role %></p>
+            </div>
+        <% }) %>
+    </div>
+
+    <div class="mt-10 bg-white p-6 rounded-xl shadow-sm">
+        <h2 class="text-xl font-bold mb-4">Top 5 Usuarios con más mensajes</h2>
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b">
+                    <th class="py-2">Usuario</th>
+                    <th class="py-2">Mensajes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% stats.topUsers.forEach(user => { %>
+                <tr class="border-b">
+                    <td class="py-2"><%= user.username %></td>
+                    <td class="py-2 font-mono"><%= user._count.messages %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-10 bg-white p-6 rounded-xl shadow-sm">
+        <h2 class="text-xl font-bold mb-4">Top 5 Conversaciones con más mensajes</h2>
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b">
+                    <th class="py-2">Chat</th>
+                    <th class="py-2">Mensajes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% let count = 0 %>
+                <% stats.topConversations.forEach(conv => { %>
+                <tr class="border-b">
+                    <td class="py-2"><%= conv.title || "chat sin nombre " + (++count) %></td>
+                    <td class="py-2 font-mono"><%= conv._count.messages %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+    
+</body>
+</html>
