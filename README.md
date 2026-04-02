@@ -7,28 +7,28 @@ Este proyecto consiste en una infraestructura robusta ( gracias al sistema modul
 
 ## 1. Organización del Proyecto
 src/
-├── common/                # Helpers, filtros de excepciones, interceptores globales
-│   ├── decorators/        # Decoradores personalizados -> @GetUser
-│   ├── dto/               # DTOs globales -> rolesDto
-│   └── guards/            # JwtGuard, BannedGuard, OwnerGuard, RolesGuard, WsBannedGuard, WsJwtGuard
-│
-├── config/                # Para validación de variables de entorno en el futuro (Joi/class-transformer)
-│   └── configuration.ts
-│
-├── database/              # Migraciones de PostgreSQL ( tambien podri contener semillas (seeds) )
-│
-├── modules/               # Los modulos 
-│   ├── dashboard/         # Consultas complejas y agregaciones para estadísticas
-│   ├── auth/              # Registro, Login, JWT Strategy   
-│   ├── chat/              # Lógica de conversaciones (chats)
-│   ├── message/           # Lógica de mensajes y status
-│   │   └── gateways/      # WebSockets (Socket.io)
-│   └── users/             # Gestión de perfiles y búsqueda de usuarios
-│
-├── providers/             # Posibles integraciones externas a futuro (S3, Redis, Mailer)
-│
-├── main.ts                # Punto de entrada
-└── app.module.ts          # Orquestador principal
+*├── common/                # Helpers, filtros de excepciones, interceptores globales
+*│   ├── decorators/        # Decoradores personalizados -> @GetUser
+*│   ├── dto/               # DTOs globales -> rolesDto
+*│   └── guards/            # JwtGuard, BannedGuard, OwnerGuard, RolesGuard, WsBannedGuard, WsJwtGuard
+*│
+*├── config/                # Para validación de variables de entorno en el futuro (Joi/class-transformer)
+*│   └── configuration.ts
+*│
+*├── database/              # Migraciones de PostgreSQL ( tambien podri contener semillas (seeds) )
+*│
+*├── modules/               # Los modulos 
+*│   ├── dashboard/         # Consultas complejas y agregaciones para estadísticas
+*│   ├── auth/              # Registro, Login, JWT Strategy   
+*│   ├── chat/              # Lógica de conversaciones (chats)
+*│   ├── message/           # Lógica de mensajes y status
+*│   │   └── gateways/      # WebSockets (Socket.io)
+*│   └── users/             # Gestión de perfiles y búsqueda de usuarios
+*│
+*├── providers/             # Posibles integraciones externas a futuro (S3, Redis, Mailer)
+*│
+*├── main.ts                # Punto de entrada
+*└── app.module.ts          # Orquestador principal
 
 La estructura sigue el estándar modular de NestJS, facilitando el mantenimiento y la escalabilidad:
 * **`src/auth`**: Gestión de sesiones y seguridad JWT.
