@@ -17,39 +17,48 @@ export class MessageGateway implements OnGatewayInit, OnGatewayConnection, OnGat
   constructor(private readonly authService: AuthService, private readonly messageService: MessageService, private prisma: PrismaService, private readonly chatService: ChatService) {}
   
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
-  async afterInit(server: any) {
+  async afterInit(server: Server) {
+    this.server = server
     console.log('WebSocket Gateway initialized');
   }
 
   async handleConnection(client: Socket) {
   try {
-    const token = client.handshake.headers.authorization?.split(' ')[1];
-    if (!token) throw new Error('No token provided');
+    const authHeader = client.handshake.headers.authorization;
+    if (!authHeader) throw new Error('No authorization header');
 
-    const payload = await this.authService.verifyJwt(token as string);
-    
-    client.data.user = payload; 
-    console.log(`User ${client.data.user.id} connected with socket ID: ${client.id}`);  
-    
-    const onlineStatus = await this.messageService.setOnlineStatus(client.data.user.id||client.data.user.sub, true);
-    const userPart = await this.prisma.participant.findMany({
-      where: { 
-        userId: client.data.user.id
-      },
-      select: {
-        conversationId: true
-      }
-    });
+    const token = authHeader.split(' ')[1];
+    if (!token) throw new Error('Invalid token format');
 
-    userPart.forEach(c => client.join(`conv_${c.conversationId}`));
-    console.log(`Client connected: ${client.id} - Online status: ${onlineStatus.isOnline}`);
+    const payload = await this.authService.verifyJwt(token);
+    if (!payload) throw new Error('Invalid user')
     
-    } catch (e) {
-      client.disconnect();
+    const userId: UUID = payload.id as UUID;
+    if (!userId) throw new Error('User ID not found in payload');
+
+    client.data.user = { ...payload, userId }; 
+
+    const [onlineStatus, userPart] = await Promise.all([
+      this.messageService.setOnlineStatus(userId, true),
+      this.prisma.participant.findMany({
+        where: { userId: userId },
+        select: { conversationId: true }
+      })
+    ]);
+
+    for (const part of userPart) {
+      client.join(`conv_${part.conversationId}`);
     }
+
+    console.log(`User ${userId} connected. Rooms joined: ${userPart.length}`);
+    
+  } catch (e) {
+    console.error(`Connection rejected: ${e}`);
+    client.disconnect();
   }
+}
 
   async handleDisconnect(client: Socket){
     const onlineStatus = await this.messageService.setOnlineStatus(client.data.user.id||client.data.user.sub, false);

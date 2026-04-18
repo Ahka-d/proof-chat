@@ -10,7 +10,7 @@ export class MessageService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
 
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   async onModuleInit() {
     await this.prisma.user.updateMany({
